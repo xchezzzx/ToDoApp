@@ -11,6 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+ToDoApp.Accessor.Storage.TodoStore.SeedOne();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
