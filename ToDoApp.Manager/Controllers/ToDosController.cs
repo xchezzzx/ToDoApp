@@ -7,14 +7,9 @@ namespace ToDoApp.Manager.Controllers;
 
 [Route("todos")]
 [ApiController]
-public class ToDosController : ControllerBase
+public class TodosController(DaprClient daprClient) : ControllerBase
 {
-    private readonly DaprClient _daprClient;
-
-    public ToDosController(DaprClient daprClient)
-    {
-        _daprClient = daprClient;
-    }
+    private readonly DaprClient _daprClient = daprClient;
 
     [HttpGet("{id:Guid}")]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken ct)
