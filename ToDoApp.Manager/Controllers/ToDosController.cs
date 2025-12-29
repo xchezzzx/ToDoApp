@@ -1,6 +1,7 @@
 ﻿using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 using ToDoApp.Contracts;
+using ToDoApp.Manager.Models;
 
 namespace ToDoApp.Manager.Controllers;
 
@@ -35,5 +36,30 @@ public class ToDosController : ControllerBase
         {
             return NotFound();
         }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateTodoRequest request, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(request.Title))
+            return BadRequest("Title is required.");
+        
+        var message = new TodoCreatedMessage
+        {
+            Id = Guid.NewGuid(),
+            Title = request.Title,
+            Description = request.Description,
+            IsCompleted = false,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _daprClient.PublishEventAsync(
+            "pubsub",
+            "todos",
+            message,
+            cancellationToken: ct
+            );
+
+        return Accepted(new { message.Id });
     }
 }

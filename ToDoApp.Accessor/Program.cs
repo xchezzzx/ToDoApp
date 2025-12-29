@@ -30,10 +30,11 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.MapControllers();
+app.UseRouting();
 
 app.UseCloudEvents();
-
 app.MapSubscribeHandler();
+
+app.MapControllers();
 
 app.Run();
