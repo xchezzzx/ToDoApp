@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="run-accessor.ps1" />
+    <File Path="run-manager.ps1" />
+  </Folder>
   <Project Path="ToDoApp.Accessor/ToDoApp.Accessor.csproj" />
   <Project Path="ToDoApp.Contracts/ToDoApp.Contracts.csproj" />
   <Project Path="ToDoApp.Manager/ToDoApp.Manager.csproj" />
