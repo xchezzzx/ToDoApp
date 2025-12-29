@@ -1,5 +1,6 @@
 ﻿using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
+using ToDoApp.Contracts;
 
 namespace ToDoApp.Manager.Controllers;
 
@@ -21,7 +22,7 @@ public class ToDosController : ControllerBase
 
         try
         {
-            var todo = await _daprClient.InvokeMethodAsync<object>(
+            var todo = await _daprClient.InvokeMethodAsync<TodoDto>(
                 HttpMethod.Get,
                 accessorAppId,
                 $"todos/{id}",

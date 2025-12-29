@@ -1,4 +1,4 @@
-﻿namespace ToDoApp.Accessor.Models;
+﻿namespace ToDoApp.Contracts;
 
 public class TodoDto
 {

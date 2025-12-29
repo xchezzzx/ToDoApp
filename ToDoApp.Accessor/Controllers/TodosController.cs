@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ToDoApp.Accessor.Data;
+using ToDoApp.Contracts;
 
 namespace ToDoApp.Accessor.Controllers;
 
@@ -19,13 +20,13 @@ public sealed class TodosController : ControllerBase
     {
         var todo = await _dbContext.Todos.AsNoTracking()
             .Where(x => x.Id == id)
-            .Select(x => new
+            .Select(x => new TodoDto
             {
-                x.Id,
-                x.Title,
-                x.Description,
-                x.IsCompleted,
-                x.CreatedAt
+                Id = x.Id,
+                Title = x.Title,
+                Description = x.Description,
+                IsCompleted = x.IsCompleted,
+                CreatedAt = x.CreatedAt
             })
             .SingleOrDefaultAsync(ct);
 
