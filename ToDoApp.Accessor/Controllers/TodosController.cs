@@ -1,21 +1,34 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using ToDoApp.Accessor.Models;
-using ToDoApp.Accessor.Storage;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ToDoApp.Accessor.Data;
 
 namespace ToDoApp.Accessor.Controllers;
 
 [Route("todos")]
 [ApiController]
-public class TodosController : ControllerBase
+public sealed class TodosController : ControllerBase
 {
-    [HttpGet("{id:Guid}")]
-    public ActionResult<TodoDto> GetTodoById([FromRoute] Guid id)
+    private readonly TodoDbContext _dbContext;
+    public TodosController(TodoDbContext dbContext)
     {
-        var todo = TodoStore.GetById(id);
-        if (todo is null)
-            return NotFound();
-        
-        return Ok(todo);
+        _dbContext = dbContext;
+    }
+
+    [HttpGet("{id:Guid}")]
+    public async Task<IActionResult> GetTodoById([FromRoute] Guid id, CancellationToken ct)
+    {
+        var todo = await _dbContext.Todos.AsNoTracking()
+            .Where(x => x.Id == id)
+            .Select(x => new
+            {
+                x.Id,
+                x.Title,
+                x.Description,
+                x.IsCompleted,
+                x.CreatedAt
+            })
+            .SingleOrDefaultAsync(ct);
+
+        return todo is null ? NotFound() : Ok(todo);
     }
 }
