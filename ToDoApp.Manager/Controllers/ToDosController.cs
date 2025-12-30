@@ -33,6 +33,21 @@ public class TodosController(DaprClient daprClient) : ControllerBase
         }
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetAll(CancellationToken ct)
+    {
+        const string accessorAppId = "todoapp-accessor";
+
+        var todos = await _daprClient.InvokeMethodAsync<IEnumerable<TodoDto>>(
+            HttpMethod.Get,
+            accessorAppId,
+            "todos",
+            cancellationToken: ct
+            );
+
+        return Ok(todos);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateTodoRequest request, CancellationToken ct)
     {
