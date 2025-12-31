@@ -1,60 +1,45 @@
 ﻿using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 using ToDoApp.Contracts;
+using ToDoApp.Manager.Clients;
 using ToDoApp.Manager.Models;
 
 namespace ToDoApp.Manager.Controllers;
 
-[Route("todos")]
 [ApiController]
-public class TodosController(DaprClient daprClient) : ControllerBase
+[Route("api/[controller]")]
+public sealed class TodosController(ITodoAccessorClient accessorClient, DaprClient daprClient) : ControllerBase
 {
-    private readonly DaprClient _daprClient = daprClient;
-
-    [HttpGet("{id:Guid}")]
-    public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken ct)
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
-        const string accessorAppId = "todoapp-accessor";
-
         try
         {
-            var todo = await _daprClient.InvokeMethodAsync<TodoDto>(
-                HttpMethod.Get,
-                accessorAppId,
-                $"todos/{id}",
-                cancellationToken: ct
-                );
-
+            var todo = await accessorClient.GetByIdAsync(id, cancellationToken);
             return Ok(todo);
         }
-        catch (InvocationException ex) when (ex.Response is not null && (int)ex.Response.StatusCode == 404)
+        catch (InvocationException)
         {
             return NotFound();
         }
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken ct)
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        const string accessorAppId = "todoapp-accessor";
-
-        var todos = await _daprClient.InvokeMethodAsync<IEnumerable<TodoDto>>(
-            HttpMethod.Get,
-            accessorAppId,
-            "todos",
-            cancellationToken: ct
-            );
-
+        var todos = await accessorClient.GetAllAsync(cancellationToken);
         return Ok(todos);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateTodoRequest request, CancellationToken ct)
+    public async Task<IActionResult> Create([FromBody] CreateTodoRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Title))
+        {
             return BadRequest("Title is required.");
-        
-        var message = new TodoCreatedMessage
+        }
+
+        var msg = new TodoCreatedMessage
         {
             Id = Guid.NewGuid(),
             Title = request.Title,
@@ -63,13 +48,8 @@ public class TodosController(DaprClient daprClient) : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
 
-        await _daprClient.PublishEventAsync(
-            "pubsub",
-            "todos",
-            message,
-            cancellationToken: ct
-            );
+        await daprClient.PublishEventAsync("pubsub", "todos", msg, cancellationToken);
 
-        return Accepted(new { message.Id });
+        return Accepted(new { msg.Id });
     }
 }
