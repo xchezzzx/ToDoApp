@@ -56,3 +56,11 @@ From the solution root:
 
 ```bash
 docker compose up --build
+```
+
+This will start:
+- Manager + Dapr sidecar
+- Accessor + Dapr sidecar
+- PostgreSQL
+- Redis
+- Dapr placement service
