@@ -1,46 +1,58 @@
-# Todo App - Developer Learning Task
+# Todo App (Dapr + Docker Compose)
 
-## Overview
-Build a simple Todo application demonstrating Dapr, message queues, Docker Compose, EF Core migrations, and testing patterns.
+A learning application demonstrating:
+- Dapr (service invocation, pub/sub)
+- Docker Compose
+- ASP.NET Web API
+- Entity Framework Core + PostgreSQL
+
+## Architecture
+
+The application consists of two services:
+
+- **Manager**
+  - Public HTTP API
+  - Validates input data
+  - Uses Dapr to communicate with other services
+
+- **Accessor**
+  - Works with the database (PostgreSQL)
+  - Processes events from the queue
+  - Returns data on request from Manager
+
+Interaction:
+- `POST /todos` → async via Dapr pub/sub
+- `GET /todos/{id}` → sync via Dapr service invocation
 
 ---
 
-## Functional Requirements
+## Technologies Used
 
-1. **Create Todo** - `POST /todos`
-   - Accepts: `title` (required), `description` (optional)
-   - Manager validates input
-   - Manager sends message to queue via Dapr output binding
-   - Accessor processes queue message and saves to database
-
-2. **Get Todo** - `GET /todos/{id}`
-   - Manager calls Accessor synchronously via Dapr service invocation
-   - Accessor retrieves from database and returns
+- .NET 10
+- ASP.NET Web API
+- Dapr
+- Docker / Docker Compose
+- PostgreSQL
+- Redis
+- Entity Framework Core
 
 ---
 
-## Non-Functional Requirements
+## Requirements
 
-### Architecture
-- **2 Services (separate dotnet projects)**:
-  - **Manager**: HTTP API, input validation, orchestrates via Dapr
-  - **Accessor**: Database access (EF Core), queue message processing
+- Docker Desktop
+- Docker Compose (v2)
+- Free ports on the host:
+  - `5084` — Manager API
+  - `5228` — Accessor API
+  - `5432` — PostgreSQL
+  - `6379` — Redis
 
-### Technologies
+---
 
-1. **Dapr**
-   - **Service Invocation** (GET): Manager → Accessor sync call (InvokeMethodAsync)
-   - **Output Binding** (POST): Manager → Queue → Accessor async processing (InvokeBindingAsync)
-   - Configure components in `dapr/components/`
+## Running the Application
 
-2. **Entity Framework Core**
-   - Use **in-memory database** or PostgreSQL
-   - Create initial migration
-   - Apply migrations on startup
+From the solution root:
 
-3. **Docker Compose**
-   - Create docker compose project in visual studio
-   - Add Manager and Accessor services
-   - Include Dapr sidecars
-   - should be able to debug from Visual Studio
-
+```bash
+docker compose up --build
