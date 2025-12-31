@@ -1,0 +1,84 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: todos
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  dapr_placement:
+    image: "daprio/dapr:1.16.5"
+    command: ["./placement", "-port", "50006"]
+    ports:
+      - "50006:50006"
+
+  accessor:
+    build:
+      context: .
+      dockerfile: ToDoApp.Accessor/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_ENVIRONMENT: Development 
+      ConnectionStrings__TodoDbConnection: Host=host.docker.internal;Port=5432;Database=todos;Username=postgres;Password=postgres
+    depends_on:
+      - postgres
+    ports:
+      - "5228:8080"
+
+  accessor-dapr:
+    image: "daprio/daprd:1.16.5"
+    command: [
+      "./daprd",
+      "-app-id", "todoapp-accessor",
+      "-app-port", "8080",
+      "-placement-host-address", "dapr_placement:50006",
+      "-resources-path", "/components",
+      "-log-level", "info"]
+    volumes:
+      - ./dapr/components:/components:ro
+    depends_on:
+      - accessor
+      - dapr_placement
+      - redis
+    network_mode: "service:accessor"
+
+  manager:
+    build:
+      context: .
+      dockerfile: ToDoApp.Manager/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_ENVIRONMENT: Development
+    ports:
+      - "5084:8080"
+    depends_on:
+      - accessor
+
+  manager-dapr:
+    image: "daprio/daprd:1.16.5"
+    command: [
+      "./daprd",
+      "-app-id", "todoapp-manager",
+      "-app-port", "8080",
+      "-placement-host-address", "dapr_placement:50006",
+      "-resources-path", "/components",
+      "-log-level", "info"]
+    volumes:
+      - ./dapr/components:/components:ro
+    depends_on:
+      - manager
+      - dapr_placement
+      - redis
+    network_mode: "service:manager"
+
+volumes:
+  postgres_data:
