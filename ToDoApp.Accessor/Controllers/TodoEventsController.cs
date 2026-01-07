@@ -7,20 +7,15 @@ using ToDoApp.Contracts;
 namespace ToDoApp.Accessor.Controllers;
 
 [ApiController]
-public class TodoEventsController : ControllerBase
+public class TodoEventsController(TodoDbContext dbContext) : ControllerBase
 {
-    private readonly TodoDbContext _dbContext;
-
-    public TodoEventsController(TodoDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly TodoDbContext _dbContext = dbContext;
 
     [Topic("pubsub", "todos")]
     [HttpPost("todos-created")]
     public async Task<IActionResult> HandleTodoCreatedAsync([FromBody] TodoCreatedMessage message, CancellationToken ct)
     {
-        var ifExists = await _dbContext.Todos.FindAsync(new object[] { message.Id }, ct);
+        var ifExists = await _dbContext.Todos.FindAsync([message.Id], ct);
         if (ifExists is not null)
         {
             return Conflict($"Todo with Id {message.Id} already exists.");
