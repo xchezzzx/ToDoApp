@@ -1,5 +1,8 @@
+name: todoapp
+
 services:
   postgres:
+    container_name: todoapp_postgres
     image: postgres:17.5
     environment:
       POSTGRES_USER: postgres
@@ -11,17 +14,20 @@ services:
       - pg_data:/var/lib/postgresql/data
 
   redis:
+    container_name: todoapp_redis
     image: redis:7
     ports:
       - "6379:6379"
 
   dapr_placement:
+    container_name: todoapp_dapr_placement
     image: "daprio/dapr:1.16.5"
     command: ["./placement", "-port", "50006"]
     ports:
       - "50006:50006"
 
   accessor:
+    container_name: todoapp_accessor
     build:
       context: .
       dockerfile: ToDoApp.Accessor/Dockerfile
@@ -35,6 +41,7 @@ services:
       - "5228:8080"
 
   accessor-dapr:
+    container_name: todoapp_accessor_dapr
     image: "daprio/daprd:1.16.5"
     command: [
       "./daprd",
@@ -52,6 +59,7 @@ services:
     network_mode: "service:accessor"
 
   manager:
+    container_name: todoapp_manager
     build:
       context: .
       dockerfile: ToDoApp.Manager/Dockerfile
@@ -64,6 +72,7 @@ services:
       - accessor
 
   manager-dapr:
+    container_name: todoapp_manager_dapr
     image: "daprio/daprd:1.16.5"
     command: [
       "./daprd",
@@ -81,4 +90,4 @@ services:
     network_mode: "service:manager"
 
 volumes:
-  postgres_data:
+  pg_data:
