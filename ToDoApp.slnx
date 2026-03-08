@@ -8,5 +8,6 @@
   </Project>
   <Project Path="ToDoApp.Accessor/ToDoApp.Accessor.csproj" />
   <Project Path="ToDoApp.Contracts/ToDoApp.Contracts.csproj" />
+  <Project Path="ToDoApp.Desktop/ToDoApp.Desktop.csproj" Id="efccba9b-118c-4b7f-9935-8838f69d35f5" />
   <Project Path="ToDoApp.Manager/ToDoApp.Manager.csproj" />
 </Solution>
