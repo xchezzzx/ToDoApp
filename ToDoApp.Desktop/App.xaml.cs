@@ -11,7 +11,7 @@ namespace ToDoApp.Desktop;
 /// </summary>
 public partial class App : Application
 {
-	public IServiceProvider ServiceProvider { get; private set; } = null!;
+	public IServiceProvider Services { get; private set; } = null!;
 
 	protected override void OnStartup(StartupEventArgs e)
 	{
@@ -25,6 +25,11 @@ public partial class App : Application
 		serviceCollection.AddSingleton<ToDoApiClient>();
 		serviceCollection.AddSingleton<MainWindowViewModel>();
 		serviceCollection.AddSingleton<MainWindow>();
+
+		Services = serviceCollection.BuildServiceProvider();
+
+		var mainWindow = Services.GetRequiredService<MainWindow>();
+		mainWindow.Show();
 
 		base.OnStartup(e);
 	}

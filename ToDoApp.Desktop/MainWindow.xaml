@@ -5,8 +5,61 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ToDoApp.Desktop"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="ToDo App" Height="500" Width="800">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Vertical"
+                    Grid.Row="0"
+                    Margin="0,0,0,12">
+            <TextBlock Text="Title"
+                       Margin="0,0,0,4"/>
+            <TextBox Text="{Binding TitleInput, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0,0,0,8"/>
+
+            <TextBlock Text="Description"
+                       Margin="0,0,0,4"/>
+            <TextBox Text="{Binding DescriptionInput, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0,0,0,4"/>
+
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Create"
+                        Width="100"
+                        Margin="0,0,8,0"
+                        Click="CreateButton_Click"/>
+                <Button Content="Refresh"
+                        Width="100"
+                        Click="RefreshButton_Click"/>
+            </StackPanel>
+        </StackPanel>
+
+        <TextBlock Grid.Row="1"
+                   Text="{Binding IsBusy, StringFormat=Loading: {0}}"
+                   Margin="0,0,0,12"/>
+
+        <DataGrid Grid.Row="2"
+                  ItemsSource="{Binding Todos}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Id"
+                                    Binding="{Binding Id}"
+                                    Width="150"/>
+                <DataGridTextColumn Header="Title"
+                                    Binding="{Binding Title}"
+                                    Width="200"/>
+                <DataGridTextColumn Header="Description"
+                                    Binding="{Binding Description}"
+                                    Width="350"/>
+                <DataGridTextColumn Header="Created at"
+                                    Binding="{Binding CreatedAt}"
+                                    Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
 
     </Grid>
 </Window>
